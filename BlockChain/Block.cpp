@@ -12,14 +12,36 @@ Block::Block(std::vector<Transaction> transactions, std::string prevHash, time_t
     this->transactions = transactions;
     this->prevHash = prevHash;
     this->timestamp = timestamp;
-    this->hash = this->calculateHash();
+    // this->hash = this->calculateHash();
 }
 
 std::string Block::calculateHash() {
-    std::hash<std::string> hasher;
+    int diff = 2;
+    int nonce = 0;
     
-    size_t hash = hasher(this->prevHash + std::ctime(&this->timestamp));
-    return std::to_string(hash);
+    std::string input = this->prevHash + std::ctime(&this->timestamp);
+    std::string hash = sha256(input);
+    // std::cout << hash << std::endl;
+    
+    while (true) {
+        hash = sha256(std::to_string(nonce) + input);
+        bool ok = true;
+        for (int i = 0; i < diff; i++) {
+            if (hash[i] != '0') {
+                ok = false;
+                break;
+            }
+        }
+        
+        if (ok)
+            break;
+        nonce += 1;
+    }
+    
+    // std::cout << hashString << ": " << hashString[0] << ", " << hashString[1] << std::endl;
+    return hash;
 }
 
-
+std::string Block::convertSizeTString(size_t toConvert) {
+    return std::to_string(toConvert);
+}

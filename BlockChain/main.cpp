@@ -22,7 +22,7 @@ int main(int argc, const char * argv[]) {
     
     coin->addBlock({Transaction("wallet1", "wallet2", 20.0f)});
     // std::cout << coin->validateChain() << std::endl;
-    std::cout << coin->checkBalance("wallet1") << std::endl;
+    std::cout << "Balance of " << "wallet1: " << coin->checkBalance("wallet1") << std::endl;
     
     /*
     struct sockaddr sin6;

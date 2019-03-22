@@ -14,6 +14,8 @@
 #include <vector>
 #include <functional>
 
+#include "sha256.hpp"
+
 class Transaction {
 public: // private
     std::string sender, receiver;
@@ -28,9 +30,9 @@ public: // private
     time_t timestamp;
     std::string hash;
     std::string prevHash;
-    std::string nonce;
     
 public:
     Block(std::vector<Transaction> transactions, std::string prevHash, time_t timestamp);
     std::string calculateHash();
+    std::string convertSizeTString(size_t toConvert);
 };
