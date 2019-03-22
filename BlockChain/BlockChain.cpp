@@ -12,12 +12,21 @@
 BlockChain::BlockChain() {
     Block *genesis = new Block({Transaction("00000", "coin", 10000000.0f)}, "00000", time(0));
     this->chain.push_back(*genesis);
+    copyChain = chain;
 }
 
 void BlockChain::addBlock(std::vector<Transaction> transactions) {
     Block lastBlock = this->getLastBlock();
-    if (lastBlock.hash.compare(lastBlock.calculateHash()) == 0)
-        this->chain.push_back(Block(transactions, lastBlock.hash, time(0)));
+    
+    if (validateChain()) {
+        if (lastBlock.hash.compare(lastBlock.calculateHash()) == 0)
+            this->chain.push_back(Block(transactions, lastBlock.hash, time(0)));
+        copyChain = chain;
+    } else {
+        std::cout << "Chain not valid" << std::endl;
+        recuperateChain();
+        addBlock(transactions);
+    }
 }
 
 Block BlockChain::getLastBlock() {
@@ -36,6 +45,9 @@ void BlockChain::createAccount(std::string address) {
 }
 
 void BlockChain::addTransaction(std::string sender, std::string receiver, float amount) {
+    if (validateChain() == false) {
+        recuperateChain();
+    }
     if (checkAddress(sender) == false || checkAddress(receiver) == false) {
         std::cout << "One of the accounts doesen't exist" << std::endl;
         return;
@@ -53,6 +65,7 @@ void BlockChain::addTransaction(std::string sender, std::string receiver, float 
 
 
 bool BlockChain::validateChain() {
+    // NOTE: Could do the recuperate chain and this function together, but better to have them so i can use them separately
     for (int i = 1; i < this->chain.size(); i++) {
         if (chain[i].prevHash.compare(chain[i-1].calculateHash()) != 0) {
             std::cout << "Not equal: " << chain[i].prevHash << " - " << chain[i-1].calculateHash() << std::endl;
@@ -91,3 +104,9 @@ bool BlockChain::checkAddress(std::string address) {
     }
     return false;
 }
+
+void BlockChain::recuperateChain() {
+    std::cout << "Recuperating last saved chain..." << std::endl;
+    chain = copyChain;
+}
+

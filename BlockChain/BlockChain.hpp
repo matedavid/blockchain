@@ -17,6 +17,7 @@
 class BlockChain {
 public: // private
     std::vector<Block> chain;
+    std::vector<Block> copyChain;
     std::vector<Transaction> pendingTransactions;
 public:
     BlockChain();
@@ -27,4 +28,5 @@ public:
     bool validateChain();
     float checkBalance(std::string wallet);
     bool checkAddress(std::string account);
+    void recuperateChain();
 };

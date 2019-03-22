@@ -19,9 +19,13 @@
 int main(int argc, const char * argv[]) {
     
     BlockChain *coin = new BlockChain();
+    
     coin->createAccount("wallet1");
-    std::cout << coin->chain.size() << std::endl;
     coin->createAccount("wallet2");
+    
+    
+    coin->chain[0].transactions[0].transaction = 10.0f;
+    
     coin->addTransaction("wallet1", "wallet2", 10);
     coin->addTransaction("wallet2", "wallet1", 20);
     
