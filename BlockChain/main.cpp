@@ -19,10 +19,13 @@
 int main(int argc, const char * argv[]) {
     
     BlockChain *coin = new BlockChain();
+    coin->createAccount("wallet1");
+    std::cout << coin->chain.size() << std::endl;
+    coin->createAccount("wallet2");
+    coin->addTransaction("wallet1", "wallet2", 10);
+    coin->addTransaction("wallet2", "wallet1", 20);
     
-    coin->addBlock({Transaction("wallet1", "wallet2", 20.0f)});
-    // std::cout << coin->validateChain() << std::endl;
-    std::cout << "Balance of " << "wallet1: " << coin->checkBalance("wallet1") << std::endl;
+    std::cout << coin-> checkBalance("wallet1") << " " << coin->checkBalance("wallet2") << std::endl;
     
     /*
     struct sockaddr sin6;

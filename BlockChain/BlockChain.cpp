@@ -10,14 +10,14 @@
 
 
 BlockChain::BlockChain() {
-    Block *genesis = new Block(std::vector<Transaction>(), "00000", time(0));
+    Block *genesis = new Block({Transaction("00000", "coin", 10000000.0f)}, "00000", time(0));
     this->chain.push_back(*genesis);
 }
 
-
 void BlockChain::addBlock(std::vector<Transaction> transactions) {
     Block lastBlock = this->getLastBlock();
-    this->chain.push_back(Block(transactions, lastBlock.hash, time(0)));
+    if (lastBlock.hash.compare(lastBlock.calculateHash()) == 0)
+        this->chain.push_back(Block(transactions, lastBlock.hash, time(0)));
 }
 
 Block BlockChain::getLastBlock() {
@@ -25,11 +25,40 @@ Block BlockChain::getLastBlock() {
 }
 
 
+void BlockChain::createAccount(std::string address) {
+    if (checkAddress(address) == false) {
+        pendingTransactions.push_back(Transaction("coin", address, 100.0f));
+        
+        // The user should wait until the transaction is accepted, but for the sake of not doing a lot of transactions I will add the block rith away
+        addBlock(pendingTransactions);
+        pendingTransactions = {};
+    }
+}
+
+void BlockChain::addTransaction(std::string sender, std::string receiver, float amount) {
+    if (checkAddress(sender) == false || checkAddress(receiver) == false) {
+        std::cout << "One of the accounts doesen't exist" << std::endl;
+        return;
+    }
+    
+    if (checkBalance(sender) >= amount) {
+        Transaction trans = Transaction(sender, receiver, amount);
+        pendingTransactions.push_back(trans);
+    }
+    if (pendingTransactions.size() >= 1) { // the amount should be bigger, somehing like 5, but for the sake of waiting... 
+        addBlock(pendingTransactions);
+        pendingTransactions = {};
+    }
+}
+
+
 bool BlockChain::validateChain() {
     for (int i = 1; i < this->chain.size(); i++) {
-        if (this->chain[i].prevHash.compare(this->chain[i-1].calculateHash()) != 0) {
+        if (chain[i].prevHash.compare(chain[i-1].calculateHash()) != 0) {
+            std::cout << "Not equal: " << chain[i].prevHash << " - " << chain[i-1].calculateHash() << std::endl;
             return false;
-        } else if (this->chain[i].hash.compare(this->chain[i].calculateHash()) != 0) {
+        } else if (chain[i].hash.compare(chain[i].calculateHash()) != 0) {
+            std::cout << "Not equal: " << chain[i].hash << " - " << chain[i].calculateHash() << std::endl;
             return false;
         }
     }
@@ -50,4 +79,15 @@ float BlockChain::checkBalance(std::string wallet) {
         }
     }
     return balance;
+}
+
+bool BlockChain::checkAddress(std::string address) {
+    for (int i = 0; i < chain.size(); i++) {
+        for (int t = 0; t < chain[i].transactions.size(); t++) {
+            if (chain[i].transactions[t].sender.compare(address) == 0 || chain[i].transactions[t].receiver.compare(address) == 0) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

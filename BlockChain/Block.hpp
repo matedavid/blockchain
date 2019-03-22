@@ -20,8 +20,9 @@ class Transaction {
 public: // private
     std::string sender, receiver;
     float transaction;
+    time_t timestamp;
 public:
-    Transaction(std::string sender, std::string receiver, float transaction) : sender(sender), receiver(receiver), transaction(transaction) { };
+    Transaction(std::string sender, std::string receiver, float transaction) : sender(sender), receiver(receiver), transaction(transaction), timestamp(time(0)) { };
 };
 
 class Block {
@@ -30,9 +31,11 @@ public: // private
     time_t timestamp;
     std::string hash;
     std::string prevHash;
+    int difficulty;
     
 public:
     Block(std::vector<Transaction> transactions, std::string prevHash, time_t timestamp);
     std::string calculateHash();
     std::string convertSizeTString(size_t toConvert);
+    std::string getTransactionString();
 };

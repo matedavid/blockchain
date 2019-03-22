@@ -12,21 +12,23 @@ Block::Block(std::vector<Transaction> transactions, std::string prevHash, time_t
     this->transactions = transactions;
     this->prevHash = prevHash;
     this->timestamp = timestamp;
-    // this->hash = this->calculateHash();
+    this->difficulty = 2;
+    this->hash = this->calculateHash();
 }
 
 std::string Block::calculateHash() {
-    int diff = 2;
     int nonce = 0;
     
-    std::string input = this->prevHash + std::ctime(&this->timestamp);
-    std::string hash = sha256(input);
-    // std::cout << hash << std::endl;
+    std::string input = this->prevHash + std::ctime(&this->timestamp) + this->getTransactionString();
+    std::string hash; // = sha256(input);
     
     while (true) {
         hash = sha256(std::to_string(nonce) + input);
         bool ok = true;
-        for (int i = 0; i < diff; i++) {
+        
+        // The difficulty defines the number of '0's that the hash needs to have in front
+        // This are calculated by adding the nonce
+        for (int i = 0; i < this->difficulty; i++) {
             if (hash[i] != '0') {
                 ok = false;
                 break;
@@ -35,13 +37,28 @@ std::string Block::calculateHash() {
         
         if (ok)
             break;
+        
         nonce += 1;
     }
     
-    // std::cout << hashString << ": " << hashString[0] << ", " << hashString[1] << std::endl;
     return hash;
 }
 
 std::string Block::convertSizeTString(size_t toConvert) {
     return std::to_string(toConvert);
 }
+
+std::string Block::getTransactionString() {
+    std::string transactionsString;
+    int value = 0;
+    for (int i = 0; i < transactions.size(); i++) {
+        // Add the total value of all the transactiosn in the Block
+        value += transactions[i].transaction;
+        
+        // Get both addresses of the transaction
+        transactionsString += transactions[i].sender + transactions[i].receiver;
+    }
+    
+    return std::to_string(value) + transactionsString;
+}
+
