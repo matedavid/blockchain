@@ -2,7 +2,7 @@
 //  BlockChain.hpp
 //  BlockChain
 //
-//  Created by David Mate López on 21/03/2019.
+//  Created by David Mate on 21/03/2019.
 //  Copyright © 2019 David Mate. All rights reserved.
 //
 
@@ -25,8 +25,8 @@ public:
     void addTransaction(std::string sender, std::string receiver, float amount);
     void createAccount(std::string address);
     Block getLastBlock();
-    bool validateChain();
+    bool validateChain(bool verbose=true);
     float checkBalance(std::string wallet);
     bool checkAddress(std::string account);
-    void recuperateChain();
+    void recoverChain();
 };

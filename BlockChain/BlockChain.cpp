@@ -2,7 +2,7 @@
 //  BlockChain.cpp
 //  BlockChain
 //
-//  Created by David Mate López on 21/03/2019.
+//  Created by David Mate on 21/03/2019.
 //  Copyright © 2019 David Mate. All rights reserved.
 //
 
@@ -23,8 +23,8 @@ void BlockChain::addBlock(std::vector<Transaction> transactions) {
             this->chain.push_back(Block(transactions, lastBlock.hash, time(0)));
         copyChain = chain;
     } else {
-        std::cout << "Chain not valid" << std::endl;
-        recuperateChain();
+        std::cout << "[ERROR]: the chain is not valid" << std::endl;
+        recoverChain();
         addBlock(transactions);
     }
 }
@@ -46,32 +46,44 @@ void BlockChain::createAccount(std::string address) {
 
 void BlockChain::addTransaction(std::string sender, std::string receiver, float amount) {
     if (validateChain() == false) {
-        recuperateChain();
+        std::cout << "[ERROR]: the chain is not valid" << std::endl;
+        recoverChain();
     }
+    
     if (checkAddress(sender) == false || checkAddress(receiver) == false) {
         std::cout << "One of the accounts doesen't exist" << std::endl;
+        return;
+    }
+    
+    if (amount < 0) {
+        std::cout << "Amount must be positive" << std::endl;
         return;
     }
     
     if (checkBalance(sender) >= amount) {
         Transaction trans = Transaction(sender, receiver, amount);
         pendingTransactions.push_back(trans);
+    } else {
+        std::cout << "Address: " << sender << " doesen't have enough funds, transaction canceled" << std::endl;
     }
-    if (pendingTransactions.size() >= 1) { // the amount should be bigger, somehing like 5, but for the sake of waiting... 
+    
+    if (pendingTransactions.size() >= 1) { // should be bigger 
         addBlock(pendingTransactions);
         pendingTransactions = {};
     }
 }
 
 
-bool BlockChain::validateChain() {
-    // NOTE: Could do the recuperate chain and this function together, but better to have them so i can use them separately
+bool BlockChain::validateChain(bool verbose) {
+    // NOTE: Could do the recover chain and this function together, recover if is not valid directly
     for (int i = 1; i < this->chain.size(); i++) {
         if (chain[i].prevHash.compare(chain[i-1].calculateHash()) != 0) {
-            std::cout << "Not equal: " << chain[i].prevHash << " - " << chain[i-1].calculateHash() << std::endl;
+            if (verbose)
+                std::cout << "Not equal: " << chain[i].prevHash << " - " << chain[i-1].calculateHash() << std::endl;
             return false;
         } else if (chain[i].hash.compare(chain[i].calculateHash()) != 0) {
-            std::cout << "Not equal: " << chain[i].hash << " - " << chain[i].calculateHash() << std::endl;
+            if (verbose)
+                std::cout << "Not equal: " << chain[i].hash << " - " << chain[i].calculateHash() << std::endl;
             return false;
         }
     }
@@ -105,8 +117,13 @@ bool BlockChain::checkAddress(std::string address) {
     return false;
 }
 
-void BlockChain::recuperateChain() {
-    std::cout << "Recuperating last saved chain..." << std::endl;
-    chain = copyChain;
+void BlockChain::recoverChain() {
+    if (!validateChain(false)) {
+        std::cout << "Recovering last saved chain..." << std::endl;
+        chain = copyChain;
+    } else {
+        std::cout << "Chain is already valid" << std::endl;
+    }
+    
 }
 

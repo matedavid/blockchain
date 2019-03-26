@@ -2,7 +2,7 @@
 //  Block.cpp
 //  BlockChain
 //
-//  Created by David Mate López on 21/03/2019.
+//  Created by David Mate on 21/03/2019.
 //  Copyright © 2019 David Mate. All rights reserved.
 //
 
@@ -49,16 +49,15 @@ std::string Block::convertSizeTString(size_t toConvert) {
 }
 
 std::string Block::getTransactionString() {
-    std::string transactionsString;
+    std::string transactionString;
     int value = 0;
     for (int i = 0; i < transactions.size(); i++) {
         // Add the total value of all the transactiosn in the Block
         value += transactions[i].transaction;
         
-        // Get both addresses of the transaction
-        transactionsString += transactions[i].sender + transactions[i].receiver;
+        // Get both addresses of the transaction and concadenate them in one single string
+        transactionString += transactions[i].sender + transactions[i].receiver;
     }
     
-    return std::to_string(value) + transactionsString;
+    return std::to_string(value) + transactionString;
 }
-

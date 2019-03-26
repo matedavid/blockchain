@@ -1,3 +1,19 @@
+/* LICENSE
+ * Updated to C++, zedwood.com 2012
+ * Based on Olivier Gay's version
+ * See Modified BSD License below:
+ *
+ * FIPS 180-2 SHA-224/256/384/512 implementation
+ * Issue date:  04/30/2005
+ * http://www.ouah.org/ogay/sha2/
+ *
+ * Copyright (C) 2005, 2007 Olivier Gay <olivier.gay@a3.epfl.ch>
+ * All rights reserved.
+ *
+ * The code has not been modified: http://www.zedwood.com/article/cpp-sha256-function
+ */
+
+
 #include <cstring>
 #include <fstream>
 #include "sha256.hpp"

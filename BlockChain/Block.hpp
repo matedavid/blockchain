@@ -2,7 +2,7 @@
 //  Block.hpp
 //  BlockChain
 //
-//  Created by David Mate López on 21/03/2019.
+//  Created by David Mate on 21/03/2019.
 //  Copyright © 2019 David Mate. All rights reserved.
 //
 
@@ -39,3 +39,4 @@ public:
     std::string convertSizeTString(size_t toConvert);
     std::string getTransactionString();
 };
+
