@@ -23,17 +23,98 @@
 
 #define PORT 8000
 
-// Request reponse schema for communication between wallet and server (blockchain)
-enum ReponseSchema { EXIT, GET_BALANCE, CREATE_TRANSACTION };
+// Request schema for communication between wallet to server
+enum RequestSchema { EXIT, GET_BALANCE, CREATE_TRANSACTION, NONE = -1 };
+
+// Response shema for cummunication from server to wallet
+enum ResponseSchema { REQUEST_INPUT_ERROR = -1, COMMAND_NOT_FOUND = -2, NOT_ENOUGH_FUNDS = -3, SUCCESS = 0 };
 
 // Parse the commands from wallet to do the necessary action in the blockchain
-ReponseSchema parseCommand(char* comm[]) {
-    ReponseSchema s = EXIT;
-    std::cout << comm << std::endl;
+RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
+    RequestSchema s;
+    std::string command, commStr = comm;
+    int commandPos = 0;
+    
+    // Get primary command
+    for (int i = 0; i < commStr.length(); i++) {
+        if (commStr[i] == ':') {
+            commandPos = i+1;
+            break;
+        }
+        command += commStr[i];
+    }
+    
+    // Get options if they are
+    std::string currentOption;
+    for (int c = commandPos; c < commStr.length(); c++) {
+        if (commStr[c] == ';') {
+            options.push_back(currentOption);
+            currentOption = {'\0'};
+            continue;
+        } else if (commStr[c] == ' ') {
+            continue;
+        }
+        currentOption += commStr[c];
+    }
+    
+    /*
+    // TODO: Delete this loop, only to check command and options, but not necessary
+    std::cout << command << std::endl;
+    for (int i = 0; i < options.size(); i++) {
+        std::cout << options[i] << std::endl;
+    }
+     */
+    
+    if (command.compare("EXIT") == 0) {
+        s = EXIT;
+    } else if (command.compare("GET_BALANCE") == 0) {
+        s = GET_BALANCE;
+    } else if (command.compare("CREATE_TRANSACTION") == 0) {
+        s = CREATE_TRANSACTION;
+    } else {
+        s = NONE;
+    }
+    
     return s;
 }
 
+ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<std::string> &options, std::string &responseValue) {
+    ResponseSchema r;
+    
+    switch (req) {
+        case GET_BALANCE:
+            r = REQUEST_INPUT_ERROR;
+            if (options.size() > 0) {
+                if (coin->checkAddress(options[0])) {
+                    float balance = coin->checkBalance(options[0]);
+                    r = SUCCESS;
+                    responseValue = std::to_string(balance);
+                }
+            }
+            break;
+            
+        case CREATE_TRANSACTION:
+            if (options.size() > 2) {
+                if (coin->checkAddress(options[0]) && coin->checkAddress(options[1])) {
+                    
+                } else {
+                    r = REQUEST_INPUT_ERROR;
+                }
+            } else {
+                r = REQUEST_INPUT_ERROR;
+            }
+            
+            break;
+        default:
+            r = COMMAND_NOT_FOUND;
+            break;
+    }
+    return r;
+}
+
 int main(int argc, const char * argv[]) {
+    
+    BlockChain *coin = new BlockChain();
     
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     int sin_size;
@@ -54,7 +135,7 @@ int main(int argc, const char * argv[]) {
     }
     
     // Start listening for requests
-    if (listen(sock, 2) == -1) {
+    if (listen(sock, 2) < 0) {
         perror("Error in listen");
         exit(-1);
     }
@@ -74,16 +155,24 @@ int main(int argc, const char * argv[]) {
         
         // Infinite loop to listen for messages and send responses
         while (true) {
-            char buffer[8] = {0};
-            recv(sockconn, &buffer, 8, 0);
+            const int n = 128;
+            char buffer[n] = {0};
+            recv(sockconn, &buffer, n, 0);
             
             printf("Recv: %s", buffer);
             
-            if (strcmp(buffer, "exit\n") == 0) {
+            // Manage communication options (example: addresses)
+            std::vector<std::string> options;
+            RequestSchema s = parseCommand(buffer, options);
+            
+            if (s == EXIT) {
                 printf("Closing connection...\n");
                 close(sockconn);
                 break;
             }
+            
+            std::string responseValue;
+            ResponseSchema r = requestAction(coin, s, options, responseValue);
         }
     }
     return 0;
