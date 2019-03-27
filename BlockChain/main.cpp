@@ -24,7 +24,8 @@
 #define PORT 8000
 
 // Request schema for communication between wallet to server
-enum RequestSchema { EXIT, GET_BALANCE, CREATE_TRANSACTION, NONE = -1 };
+// TODO: Implement CREATE_ADDRESS schema method
+enum RequestSchema { EXIT, GET_BALANCE, CREATE_TRANSACTION, CREATE_ADDRESS, NONE = -1 };
 
 // Response shema for cummunication from server to wallet
 enum ResponseSchema { REQUEST_INPUT_ERROR = -1, COMMAND_NOT_FOUND = -2, NOT_ENOUGH_FUNDS = -3, SUCCESS = 0 };
@@ -57,14 +58,6 @@ RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
         currentOption += commStr[c];
     }
     
-    /*
-    // TODO: Delete this loop, only to check command and options, but not necessary
-    std::cout << command << std::endl;
-    for (int i = 0; i < options.size(); i++) {
-        std::cout << options[i] << std::endl;
-    }
-     */
-    
     if (command.compare("EXIT") == 0) {
         s = EXIT;
     } else if (command.compare("GET_BALANCE") == 0) {
@@ -81,6 +74,8 @@ RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
 ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<std::string> &options, std::string &responseValue) {
     ResponseSchema r;
     
+    coin->createAccount("3333");
+    
     switch (req) {
         case GET_BALANCE:
             r = REQUEST_INPUT_ERROR;
@@ -96,7 +91,14 @@ ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<st
         case CREATE_TRANSACTION:
             if (options.size() > 2) {
                 if (coin->checkAddress(options[0]) && coin->checkAddress(options[1])) {
+                    float amount = (float)stof(options[2]);
                     
+                    if (coin->checkBalance(options[0]) >= amount) {
+                        responseValue = std::to_string(coin->checkBalance(options[0])) + ";";
+                        r = SUCCESS;
+                    } else {
+                        r = NOT_ENOUGH_FUNDS;
+                    }
                 } else {
                     r = REQUEST_INPUT_ERROR;
                 }
@@ -173,6 +175,20 @@ int main(int argc, const char * argv[]) {
             
             std::string responseValue;
             ResponseSchema r = requestAction(coin, s, options, responseValue);
+            
+            if (r == REQUEST_INPUT_ERROR) {
+                std::string res = "REQUEST_INPUT_ERROR:;\n";
+                send(sockconn, res.c_str(), sizeof(res), 0);
+            } else if (r == NOT_ENOUGH_FUNDS) {
+                std::string res = "NOT_ENOUGH_FUNDS:;\n";
+                send(sockconn, res.c_str(), sizeof(res), 0);
+            } else if (r == COMMAND_NOT_FOUND) {
+                std::string res = "COMMAND_NOT_FOUND:;\n";
+                send(sockconn, res.c_str(), sizeof(res), 0);
+            } else if (r == SUCCESS) {
+                std::string res = "SUCCESS: " + responseValue + ";\n";
+                send(sockconn, res.c_str(), sizeof(res), 0);
+            }
         }
     }
     return 0;
@@ -190,17 +206,5 @@ int main(int argc, const char * argv[]) {
     coin->addTransaction("wallet1", "wallet2", 50);
     
     std::cout << coin->checkBalance("wallet1") << " " << coin->checkBalance("wallet2") << std::endl;
-    
-    struct sockaddr sin6;
-    
-    int s = socket(AF_INET, SOCK_STREAM, 0);
-    bzero(&sin6, sizeof(sin6));
-    
-    if (s == 0) {
-        perror("Socket failed");
-    } else {
-        std::cout << "Returned: " << s << std::endl;
-    
-    }
     */
 }
