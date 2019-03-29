@@ -28,7 +28,7 @@
 enum RequestSchema { EXIT, GET_BALANCE, CREATE_TRANSACTION, CREATE_ADDRESS, NONE = -1 };
 
 // Response shema for cummunication from server to wallet
-enum ResponseSchema { REQUEST_INPUT_ERROR = -1, COMMAND_NOT_FOUND = -2, NOT_ENOUGH_FUNDS = -3, SUCCESS = 0 };
+enum ResponseSchema { REQUEST_INPUT_ERROR = -1, COMMAND_NOT_FOUND = -2, NOT_ENOUGH_FUNDS = -3, ADDRESS_EXISTS = -4, SUCCESS = 0 };
 
 // Parse the commands from wallet to do the necessary action in the blockchain
 RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
@@ -50,7 +50,7 @@ RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
     for (int c = commandPos; c < commStr.length(); c++) {
         if (commStr[c] == ';') {
             options.push_back(currentOption);
-            currentOption = {'\0'};
+            currentOption.clear();
             continue;
         } else if (commStr[c] == ' ') {
             continue;
@@ -64,6 +64,8 @@ RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
         s = GET_BALANCE;
     } else if (command.compare("CREATE_TRANSACTION") == 0) {
         s = CREATE_TRANSACTION;
+    } else if (command.compare("CREATE_ADDRESS") == 0) {
+        s = CREATE_ADDRESS;
     } else {
         s = NONE;
     }
@@ -73,9 +75,6 @@ RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
 
 ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<std::string> &options, std::string &responseValue) {
     ResponseSchema r;
-    
-    coin->createAccount("3333");
-    
     switch (req) {
         case GET_BALANCE:
             r = REQUEST_INPUT_ERROR;
@@ -89,12 +88,14 @@ ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<st
             break;
             
         case CREATE_TRANSACTION:
-            if (options.size() > 2) {
+            if (options.size() == 3) {
+                std::cout << coin->checkAddress(options[0]) << " " << options[1] << ": " << coin->checkAddress(options[1]) << std::endl;
                 if (coin->checkAddress(options[0]) && coin->checkAddress(options[1])) {
                     float amount = (float)stof(options[2]);
                     
                     if (coin->checkBalance(options[0]) >= amount) {
-                        responseValue = std::to_string(coin->checkBalance(options[0])) + ";";
+                        coin->addTransaction(options[0], options[1], amount);
+                        responseValue = std::to_string(coin->checkBalance(options[0]));
                         r = SUCCESS;
                     } else {
                         r = NOT_ENOUGH_FUNDS;
@@ -107,6 +108,23 @@ ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<st
             }
             
             break;
+            
+        case CREATE_ADDRESS:
+            // std::cout << "Creating address" << std::endl;
+            if (options.size() > 0) {
+                if (!coin->checkAddress(options[0])) {
+                    // std::cout << "Address does not exist, creating wallet" << std::endl;
+                    responseValue = "Address does not exist, creating wallet";
+                    coin->createAccount(options[0]);
+                    r = SUCCESS;
+                } else {
+                    // responseValue = "Address already exists";
+                    r = ADDRESS_EXISTS;
+                }
+            } else {
+                r = REQUEST_INPUT_ERROR;
+            }
+            break;
         default:
             r = COMMAND_NOT_FOUND;
             break;
@@ -117,6 +135,7 @@ ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<st
 int main(int argc, const char * argv[]) {
     
     BlockChain *coin = new BlockChain();
+    coin->createAccount("3333");
     
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     int sin_size;
@@ -173,38 +192,30 @@ int main(int argc, const char * argv[]) {
                 break;
             }
             
-            std::string responseValue;
+            std::string responseValue, res;
             ResponseSchema r = requestAction(coin, s, options, responseValue);
+            std::cout << responseValue << std::endl;
             
             if (r == REQUEST_INPUT_ERROR) {
-                std::string res = "REQUEST_INPUT_ERROR:;\n";
-                send(sockconn, res.c_str(), sizeof(res), 0);
+                res = "REQUEST_INPUT_ERROR:;\n";
+                // send(sockconn, res.c_str(), sizeof(res), 0);
             } else if (r == NOT_ENOUGH_FUNDS) {
-                std::string res = "NOT_ENOUGH_FUNDS:;\n";
-                send(sockconn, res.c_str(), sizeof(res), 0);
+                res = "NOT_ENOUGH_FUNDS:;\n";
+                // send(sockconn, res.c_str(), sizeof(res), 0);
             } else if (r == COMMAND_NOT_FOUND) {
-                std::string res = "COMMAND_NOT_FOUND:;\n";
-                send(sockconn, res.c_str(), sizeof(res), 0);
+                res = "COMMAND_NOT_FOUND:;\n";
+                // send(sockconn, res.c_str(), sizeof(res), 0);
+            } else if (r == ADDRESS_EXISTS) {
+                res = "ADDRESS_EXISTS:;\n";
+                // send(sockconn, res.c_str(), sizeof(res), 0);
             } else if (r == SUCCESS) {
-                std::string res = "SUCCESS: " + responseValue + ";\n";
-                send(sockconn, res.c_str(), sizeof(res), 0);
+                res = "SUCCESS: " + responseValue + ";\n";
+                // send(sockconn, res.c_str(), sizeof(res), 0);
             }
+            //send(sockconn, res.c_str(), sizeof(res), 0);
+            send(sockconn, res.c_str(), res.length(), 0);
+            res.clear();
         }
     }
     return 0;
-    
-    
-    
-    /*
-    BlockChain *coin = new BlockChain();
-    
-    coin->createAccount("wallet1");
-    coin->createAccount("wallet2");
-    
-    coin->chain[1].transactions[0].transaction = 200.0f;
-    
-    coin->addTransaction("wallet1", "wallet2", 50);
-    
-    std::cout << coin->checkBalance("wallet1") << " " << coin->checkBalance("wallet2") << std::endl;
-    */
 }

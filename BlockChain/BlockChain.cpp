@@ -45,12 +45,12 @@ void BlockChain::createAccount(std::string address) {
 }
 
 void BlockChain::addTransaction(std::string sender, std::string receiver, float amount) {
-    if (validateChain() == false) {
+    if (!validateChain()) {
         std::cout << "[ERROR]: the chain is not valid" << std::endl;
         recoverChain();
     }
     
-    if (checkAddress(sender) == false || checkAddress(receiver) == false) {
+    if (!checkAddress(sender) || !checkAddress(receiver)) {
         std::cout << "One of the accounts doesen't exist" << std::endl;
         return;
     }
