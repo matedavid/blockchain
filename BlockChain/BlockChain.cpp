@@ -51,12 +51,12 @@ void BlockChain::addTransaction(std::string sender, std::string receiver, float 
     }
     
     if (!checkAddress(sender) || !checkAddress(receiver)) {
-        std::cout << "One of the accounts doesen't exist" << std::endl;
+        std::cout << "[ERROR]: One of the accounts doesen't exist" << std::endl;
         return;
     }
     
     if (amount < 0) {
-        std::cout << "Amount must be positive" << std::endl;
+        std::cout << "[ERROR]: Amount must be positive" << std::endl;
         return;
     }
     
@@ -64,7 +64,7 @@ void BlockChain::addTransaction(std::string sender, std::string receiver, float 
         Transaction trans = Transaction(sender, receiver, amount);
         pendingTransactions.push_back(trans);
     } else {
-        std::cout << "Address: " << sender << " doesen't have enough funds, transaction canceled" << std::endl;
+        std::cout << "[ERROR]: Address: " << sender << " doesen't have enough funds, transaction canceled" << std::endl;
     }
     
     if (pendingTransactions.size() >= 1) { // should be bigger 

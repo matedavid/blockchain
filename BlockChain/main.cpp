@@ -24,7 +24,6 @@
 #define PORT 8000
 
 // Request schema for communication between wallet to server
-// TODO: Implement CREATE_ADDRESS schema method
 enum RequestSchema { EXIT, GET_BALANCE, CREATE_TRANSACTION, CREATE_ADDRESS, NONE = -1 };
 
 // Response shema for cummunication from server to wallet
@@ -73,6 +72,7 @@ RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
     return s;
 }
 
+// Do the action given request schema
 ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<std::string> &options, std::string &responseValue) {
     ResponseSchema r;
     switch (req) {
@@ -135,8 +135,9 @@ ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<st
 int main(int argc, const char * argv[]) {
     
     BlockChain *coin = new BlockChain();
-    coin->createAccount("3333");
+    // coin->createAccount("3333");
     
+    // Creation of the socket
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     int sin_size;
     
@@ -186,6 +187,7 @@ int main(int argc, const char * argv[]) {
             std::vector<std::string> options;
             RequestSchema s = parseCommand(buffer, options);
             
+            // Close connection if request type is exit
             if (s == EXIT) {
                 printf("Closing connection...\n");
                 close(sockconn);
@@ -194,7 +196,6 @@ int main(int argc, const char * argv[]) {
             
             std::string responseValue, res;
             ResponseSchema r = requestAction(coin, s, options, responseValue);
-            std::cout << responseValue << std::endl;
             
             if (r == REQUEST_INPUT_ERROR) {
                 res = "REQUEST_INPUT_ERROR:;\n";
