@@ -7,11 +7,10 @@
 //
 
 #include <iostream>
-#include <sys/socket.h>
 #include <string>
 #include <ctime>
 
-// Socket libraries include
+// Socket libraries
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -110,11 +109,9 @@ ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<st
             break;
             
         case CREATE_ADDRESS:
-            // std::cout << "Creating address" << std::endl;
             if (options.size() > 0) {
                 if (!coin->checkAddress(options[0])) {
-                    // std::cout << "Address does not exist, creating wallet" << std::endl;
-                    responseValue = "Address does not exist, creating wallet";
+                    responseValue = "Creating wallet";
                     coin->createAccount(options[0]);
                     r = SUCCESS;
                 } else {
@@ -135,8 +132,7 @@ ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<st
 int main(int argc, const char * argv[]) {
     
     BlockChain *coin = new BlockChain();
-    // coin->createAccount("3333");
-    
+
     // Creation of the socket
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     int sin_size;
@@ -169,7 +165,7 @@ int main(int argc, const char * argv[]) {
         sin_size = sizeof(struct sockaddr_in);
         int sockconn = accept(sock, (struct sockaddr*)&client, (socklen_t*)&sin_size);
         
-        send(sockconn, "Welcome to the socket\n", 22, 0);
+        send(sockconn, "Welcome to the socket;", 22, 0);
         if (sockconn == -1) {
             perror("Error in accept");
             exit(-1);
@@ -199,21 +195,16 @@ int main(int argc, const char * argv[]) {
             
             if (r == REQUEST_INPUT_ERROR) {
                 res = "REQUEST_INPUT_ERROR:;\n";
-                // send(sockconn, res.c_str(), sizeof(res), 0);
             } else if (r == NOT_ENOUGH_FUNDS) {
                 res = "NOT_ENOUGH_FUNDS:;\n";
-                // send(sockconn, res.c_str(), sizeof(res), 0);
             } else if (r == COMMAND_NOT_FOUND) {
                 res = "COMMAND_NOT_FOUND:;\n";
-                // send(sockconn, res.c_str(), sizeof(res), 0);
             } else if (r == ADDRESS_EXISTS) {
                 res = "ADDRESS_EXISTS:;\n";
-                // send(sockconn, res.c_str(), sizeof(res), 0);
             } else if (r == SUCCESS) {
                 res = "SUCCESS: " + responseValue + ";\n";
-                // send(sockconn, res.c_str(), sizeof(res), 0);
             }
-            //send(sockconn, res.c_str(), sizeof(res), 0);
+
             send(sockconn, res.c_str(), res.length(), 0);
             res.clear();
         }
