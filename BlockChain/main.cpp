@@ -173,7 +173,7 @@ int main(int argc, const char * argv[]) {
         
         // Infinite loop to listen for messages and send responses
         while (true) {
-            const int n = 128;
+            const int n = 200;
             char buffer[n] = {0};
             recv(sockconn, &buffer, n, 0);
             
