@@ -1,8 +1,9 @@
 # Local blockchain based on bitcoin
 
 ### Use:
-Download the python cli local wallet from [here](https://github.com/matedavid/blockchain_wallet)
-Communicate using your computer terminal 
+Download the python cli local wallet from [here](https://github.com/matedavid/blockchain_wallet) 
+
+Communicate using your computer terminal:
 - MacOS: ```nc localhost [PORT]```
 
 ### Wallet - Blockchain communication schema 
