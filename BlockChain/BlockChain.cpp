@@ -8,9 +8,10 @@
 
 #include "BlockChain.hpp"
 
-
 BlockChain::BlockChain() {
-    Block *genesis = new Block({Transaction("00000", "coin", 10000000.0f)}, "00000", time(0));
+    std::vector<Transaction> genesisTransactions;
+    genesisTransactions.push_back(Transaction("00000", "coin", 10000000.0f));
+    Block *genesis = new Block(genesisTransactions, "00000", time(0));
     this->chain.push_back(*genesis);
     copyChain = chain;
 }
@@ -40,7 +41,8 @@ void BlockChain::createAccount(std::string address) {
         
         // The user should wait until the transaction is accepted, but for the sake of not doing a lot of transactions I will add the block rith away
         addBlock(pendingTransactions);
-        pendingTransactions = {};
+        // pendingTransactions = {};
+        pendingTransactions.clear();
     }
 }
 
@@ -69,7 +71,8 @@ void BlockChain::addTransaction(std::string sender, std::string receiver, float 
     
     if (pendingTransactions.size() >= 1) { // should be bigger 
         addBlock(pendingTransactions);
-        pendingTransactions = {};
+        // pendingTransactions = {};
+        pendingTransactions.clear();
     }
 }
 
