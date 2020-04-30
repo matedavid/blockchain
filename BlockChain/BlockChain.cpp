@@ -127,6 +127,5 @@ void BlockChain::recoverChain() {
     } else {
         std::cout << "Chain is already valid" << std::endl;
     }
-    
 }
 

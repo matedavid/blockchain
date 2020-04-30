@@ -30,6 +30,6 @@ Global schema: ```<Command schema>: [option 1]; [option 2]; ...```
 - ```CREATE_ADDRESS: address;```
     - **Description:** creates a new account with specified address
     - **Return:**
-        - ```REQUEST_INPUT_ERROR:;``` if address if address is not correct
+        - ```REQUEST_INPUT_ERROR:;``` if address is not correct
         - ```ADDRESS_EXISTS:;``` if the specified address already has an account
         - ```SUCCESS:;``` if all Ok
