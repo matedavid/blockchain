@@ -52,6 +52,16 @@ int createSocket() {
     return sock;
 }
 
+
+
+int main(int argc, const char * argv[]) {
+    DNS *dns = new DNS();
+    dns->getNodes();
+    return 0;
+}
+
+
+/*
 int main(int argc, const char * argv[]) {
     
     // Creation of the blockchain
@@ -114,3 +124,4 @@ int main(int argc, const char * argv[]) {
     }
     return 0;
 }
+*/
