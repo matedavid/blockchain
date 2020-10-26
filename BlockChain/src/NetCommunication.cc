@@ -6,7 +6,7 @@
 //  Copyright © 2019 David Mate. All rights reserved.
 //
 
-#include "NetCommunication.hpp"
+#include "NetCommunication.h"
 
 // Parse the commands from wallet to do the necessary action in the blockchain
 RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
@@ -108,43 +108,3 @@ ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<st
     }
     return r;
 }
-
-
-std::vector<Node> DNS::getNodes() {
-    http::Request request(this->address+"api/getNodes");
-    const http::Response response = request.send("GET");
-    std::string res = std::string(response.body.begin(), response.body.end());
-    std::cout << "Complete: " << res << std::endl;
-    
-    // Get all nodes
-    std::vector<Node> nodes;
-    
-    std::vector<std::string> currentNode;
-    std::string currentValue;
-    for (int i = 0; i < res.length(); i++) {
-        if (res[i] == ',') {
-            currentNode.push_back(currentValue);
-            currentValue.clear();
-            i++;
-        } else if (res[i] == ';') {
-            currentNode.push_back(currentValue);
-            currentValue.clear();
-
-            Node node = { currentNode.at(0), currentNode.at(1), currentNode.at(2) };
-            nodes.push_back(node);
-            currentNode.clear();
-            i++;
-        }
-        currentValue += res[i];
-    }
-    
-    for (int e = 0; e < nodes.size(); e++) {
-        Node node = nodes.at(e);
-        std::cout << node.header << " " << node.online << " " << node.last_connected << std::endl;
-    }
-    
-    return nodes;
-}
-
-
-void DNS::sendNode() {  }

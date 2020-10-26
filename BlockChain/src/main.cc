@@ -18,9 +18,10 @@
 #include <netinet/in.h>
 
 // File inclues
-#include "BlockChain.hpp"
-#include "Block.hpp"
-#include "NetCommunication.hpp"
+#include "BlockChain.h"
+#include "Block.h"
+#include "NetCommunication.h"
+#include "Dns.h"
 
 #define PORT 8000
 
@@ -52,16 +53,14 @@ int createSocket() {
     return sock;
 }
 
-
-
+/*
 int main(int argc, const char * argv[]) {
     DNS *dns = new DNS();
     dns->getNodes();
     return 0;
 }
+ */
 
-
-/*
 int main(int argc, const char * argv[]) {
     
     // Creation of the blockchain
@@ -124,4 +123,3 @@ int main(int argc, const char * argv[]) {
     }
     return 0;
 }
-*/

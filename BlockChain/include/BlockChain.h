@@ -12,7 +12,7 @@
 #include <vector>
 #include <ctime>
 
-#include "Block.hpp"
+#include "Block.h"
 
 class BlockChain {
 public: // private

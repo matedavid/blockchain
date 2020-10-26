@@ -6,7 +6,7 @@
 //  Copyright © 2019 David Mate. All rights reserved.
 //
 
-#include "BlockChain.hpp"
+#include "BlockChain.h"
 
 BlockChain::BlockChain() {
     std::vector<Transaction> genesisTransactions;
