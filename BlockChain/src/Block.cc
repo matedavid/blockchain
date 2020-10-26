@@ -6,7 +6,7 @@
 //  Copyright © 2019 David Mate. All rights reserved.
 //
 
-#include "Block.hpp"
+#include "Block.h"
 
 Block::Block(std::vector<Transaction> transactions, std::string prevHash, time_t timestamp) {
     this->transactions = transactions;
