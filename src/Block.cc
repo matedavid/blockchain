@@ -13,30 +13,28 @@ Block::Block(std::vector<Transaction> transactions, std::string prevHash, time_t
     this->prevHash = prevHash;
     this->timestamp = timestamp;
     this->difficulty = 2;
-    this->hash = this->calculateHash();
+    this->hash = this->computeHash();
 }
 
-std::string Block::calculateHash() {
+std::string Block::computeHash() {
     int nonce = 0;
     
     std::string input = this->prevHash + std::ctime(&this->timestamp) + this->getTransactionString();
-    std::string hash; // = sha256(input);
+    std::string hash;
     
     while (true) {
         hash = sha256(std::to_string(nonce) + input);
         bool ok = true;
         
         // The difficulty defines the number of '0's that the hash needs to have in front
-        // This are calculated by adding the nonce
+        // This are computed by adding the nonce
         for (int i = 0; i < this->difficulty; i++) {
             if (hash[i] != '0') {
                 ok = false;
                 break;
             }
         }
-        
-        if (ok)
-            break;
+        if (ok) break;
         
         nonce += 1;
     }

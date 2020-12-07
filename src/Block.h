@@ -35,7 +35,7 @@ public: // private
     
 public:
     Block(std::vector<Transaction> transactions, std::string prevHash, time_t timestamp);
-    std::string calculateHash();
+    std::string computeHash();
     std::string convertSizeTString(size_t toConvert);
     std::string getTransactionString();
 };
