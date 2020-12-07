@@ -49,17 +49,8 @@ int createSocket() {
         perror("Error in listen");
         exit(-1);
     }
-    
     return sock;
 }
-
-/*
-int main(int argc, const char * argv[]) {
-    DNS *dns = new DNS();
-    dns->getNodes();
-    return 0;
-}
- */
 
 int main(int argc, const char * argv[]) {
     

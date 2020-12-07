@@ -76,7 +76,6 @@ void BlockChain::addTransaction(std::string sender, std::string receiver, float 
     }
 }
 
-
 bool BlockChain::validateChain(bool verbose) {
     // NOTE: Could do the recover chain and this function together, recover if is not valid directly
     for (int i = 1; i < this->chain.size(); i++) {
