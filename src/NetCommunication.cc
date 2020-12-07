@@ -55,17 +55,21 @@ ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<st
 				r = REQUEST_INPUT_ERROR;
 			else if (!coin->checkAddress(options[0]) || !coin->checkAddress(options[1]))
 				r = REQUEST_INPUT_ERROR;
-			else if (coin->checkBalance(options[0]) < amount) 
-				r = NOT_ENOUGH_FUNDS;
 			else {
-				coin->addtransaction(options[0], options[1], amount);
-				responsevalue = std::to_string(coin->checkbalance(options[0]));
-				r = success;
+				float amount = (float)stof(options[2]);
+				if (coin->checkBalance(options[0]) < amount) {
+					r = NOT_ENOUGH_FUNDS;
+					break;
+				}
+
+				coin->addTransaction(options[0], options[1], amount);
+				responseValue = std::to_string(coin->checkBalance(options[0]));
+				r = SUCCESS;
 			}
 			break;
 
         case CREATE_ADDRESS:
-			if (!options.size() || options[0].length != 66)
+			if (!options.size() || options[0].length() != 66)
 				r = REQUEST_INPUT_ERROR;
 			else if (coin->checkAddress(options[0])) 
 				r = ADDRESS_EXISTS;
