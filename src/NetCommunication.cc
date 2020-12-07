@@ -1,11 +1,3 @@
-//
-//  NetCommunication.cpp
-//  BlockChain
-//
-//  Created by David Mate on 05/04/2019.
-//  Copyright © 2019 David Mate. All rights reserved.
-//
-
 #include "NetCommunication.h"
 
 // Parse the commands from wallet to do the necessary action in the blockchain
@@ -23,7 +15,7 @@ RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
         command += commStr[i];
     }
     
-    // Get options if they are
+    // Get options if there are
     std::string currentOption;
     for (int c = commandPos; c < commStr.length(); c++) {
         if (commStr[c] == ';') {
@@ -36,18 +28,12 @@ RequestSchema parseCommand(char comm[], std::vector<std::string> &options) {
         currentOption += commStr[c];
     }
     
-    if (command.compare("EXIT") == 0) {
-        s = EXIT;
-    } else if (command.compare("GET_BALANCE") == 0) {
-        s = GET_BALANCE;
-    } else if (command.compare("CREATE_TRANSACTION") == 0) {
-        s = CREATE_TRANSACTION;
-    } else if (command.compare("CREATE_ADDRESS") == 0) {
-        s = CREATE_ADDRESS;
-    } else {
-        s = NONE;
-    }
-    
+    if (command.compare("EXIT") == 0) s = EXIT;
+    else if (command.compare("GET_BALANCE") == 0) s = GET_BALANCE;
+    else if (command.compare("CREATE_TRANSACTION") == 0) s = CREATE_TRANSACTION;
+    else if (command.compare("CREATE_ADDRESS") == 0) s = CREATE_ADDRESS;
+    else s = NONE;
+
     return s;
 }
 
@@ -57,54 +43,43 @@ ResponseSchema requestAction(BlockChain *coin, RequestSchema req, std::vector<st
     switch (req) {
         case GET_BALANCE:
             r = REQUEST_INPUT_ERROR;
-            if (options.size() > 0) {
-                if (coin->checkAddress(options[0])) {
-                    float balance = coin->checkBalance(options[0]);
-                    r = SUCCESS;
-                    responseValue = std::to_string(balance);
-                }
+            if (options.size() > 0 and coin->checkAddress(options[0])) {
+                float balance = coin->checkBalance(options[0]);
+                r = SUCCESS;
+                responseValue = std::to_string(balance);
             }
             break;
-            
+
         case CREATE_TRANSACTION:
-            if (options.size() == 3) {
-                std::cout << coin->checkAddress(options[0]) << " " << options[1] << ": " << coin->checkAddress(options[1]) << std::endl;
-                if (coin->checkAddress(options[0]) && coin->checkAddress(options[1])) {
-                    float amount = (float)stof(options[2]);
-                    
-                    if (coin->checkBalance(options[0]) >= amount) {
-                        coin->addTransaction(options[0], options[1], amount);
-                        responseValue = std::to_string(coin->checkBalance(options[0]));
-                        r = SUCCESS;
-                    } else {
-                        r = NOT_ENOUGH_FUNDS;
-                    }
-                } else {
-                    r = REQUEST_INPUT_ERROR;
-                }
-            } else {
-                r = REQUEST_INPUT_ERROR;
-            }
-            
-            break;
-            
+			if (options.size() != 3)
+				r = REQUEST_INPUT_ERROR;
+			else if (!coin->checkAddress(options[0]) || !coin->checkAddress(options[1]))
+				r = REQUEST_INPUT_ERROR;
+			else if (coin->checkBalance(options[0]) < amount) 
+				r = NOT_ENOUGH_FUNDS;
+			else {
+				coin->addtransaction(options[0], options[1], amount);
+				responsevalue = std::to_string(coin->checkbalance(options[0]));
+				r = success;
+			}
+			break;
+
         case CREATE_ADDRESS:
-            if (options.size()) {
-                if (!coin->checkAddress(options[0]) && options[0].length() == 66) {
-                    responseValue = "Creating wallet";
-                    coin->createAccount(options[0]);
-                    r = SUCCESS;
-                } else {
-                    // responseValue = "Address already exists";
-                    r = (options[0].length() != 66) ? REQUEST_INPUT_ERROR : ADDRESS_EXISTS;
-                }
-            } else {
-                r = REQUEST_INPUT_ERROR;
-            }
-            break;
+			if (!options.size() || options[0].length != 66)
+				r = REQUEST_INPUT_ERROR;
+			else if (coin->checkAddress(options[0])) 
+				r = ADDRESS_EXISTS;
+			else {
+                responseValue = "Creating wallet";
+                coin->createAccount(options[0]);
+                r = SUCCESS;
+			}
+			break;
+
         default:
             r = COMMAND_NOT_FOUND;
             break;
     }
     return r;
 }
+

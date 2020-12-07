@@ -1,27 +1,18 @@
-//
-//  main.cpp
-//  BlockChain
-//
-//  Created by David Mate López on 21/03/2019.
-//  Copyright © 2019 David Mate. All rights reserved.
-//
-
 #include <iostream>
 #include <string>
 #include <ctime>
 
-// Socket libraries
+// Socket Libraries
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 
-// File inclues
+// File Includes
 #include "BlockChain.h"
 #include "Block.h"
 #include "NetCommunication.h"
-#include "Dns.h"
 
 #define PORT 8000
 
@@ -96,17 +87,16 @@ int main(int argc, const char * argv[]) {
             std::string responseValue, res;
             ResponseSchema r = requestAction(coin, s, options, responseValue);
             
-            if (r == REQUEST_INPUT_ERROR) {
+            if (r == REQUEST_INPUT_ERROR)
                 res = "REQUEST_INPUT_ERROR:;\n";
-            } else if (r == NOT_ENOUGH_FUNDS) {
+			else if (r == NOT_ENOUGH_FUNDS)
                 res = "NOT_ENOUGH_FUNDS:;\n";
-            } else if (r == COMMAND_NOT_FOUND) {
+            else if (r == COMMAND_NOT_FOUND)
                 res = "COMMAND_NOT_FOUND:;\n";
-            } else if (r == ADDRESS_EXISTS) {
+            else if (r == ADDRESS_EXISTS)
                 res = "ADDRESS_EXISTS:;\n";
-            } else if (r == SUCCESS) {
+            else if (r == SUCCESS)
                 res = "SUCCESS: " + responseValue + ";\n";
-            }
 
             send(sockconn, res.c_str(), res.length(), 0);
             res.clear();
