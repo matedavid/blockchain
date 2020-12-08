@@ -14,7 +14,7 @@
 #include <vector>
 #include <functional>
 
-#include "sha256.hpp"
+#include "sha256.h"
 
 class Transaction {
 public: // private
